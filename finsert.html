@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FInsert</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #ecf0f1;
+            --accent-color: #3498db;
+            --border-color: #bdc3c7;
+            --highlight-color: #4aa3df;
+            --tour-background-color: #2980b9;
+            --danger-color: #e74c3c; /* Aggiunto per il colore di pericolo */
+            --highlight-border-color: #ff6347; /* Aggiunto per il bordo evidenziato */
+            --font-family: 'Courier New', monospace;
+            --text-color: #2c3e50; /* Aggiunto per il colore del testo */
+            --text-light-color: #bdc3c7; /* Aggiunto per il colore del testo leggero */
+            --background-color: #2c3e50; /* Aggiunto per il colore dello sfondo */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        .header {
+            width: 100%;
+            height: 60px;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .header-title {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: flex-end; /* Allinea l'elemento figlio più basso */
+        }
+
+        .header-subtitle {
+            color: var(--text-light-color); /* Grigio chiaro */
+            font-size: 16px;
+            margin-left: 5px; /* Distanza tra il titolo e il sottotitolo */
+            line-height: 1; /* Allinea il testo più basso */
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header button {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .header button:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 80px 20px 20px 20px;
+            gap: 20px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .section {
+            flex: 1;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: flex 0.5s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .editable {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            font-family: var(--font-family);
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        #container-output-a,
+        #container-output-b {
+            flex: 1;
+            overflow: auto;
+        }
+
+        .label-table {
+            margin: 25px 0;
+        }
+
+        .table-name {
+            display: inline;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: none;
+            font-family: var(--font-family);
+        }
+
+        .table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .table th:first-child,
+        .table td:first-child {
+            width: 200px;
+            word-break: break-all;
+        }
+
+        .input-field {
+            width: 100%;
+            border: none;
+            background-color: transparent;
+            outline: none;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        /* Tour Mode Styles */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            z-index: 1000;
+            display: none; /* Nascondi l'overlay inizialmente */
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: var(--font-family);
+        }
+
+        .tour-overlay.active {
+            display: flex; /* Mostra l'overlay quando attivo */
+        }
+
+        .tour-highlight {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0);
+            border-color: var(--highlight-color); /* Cambia colore del bordo */
+            border-style: solid;
+            border-width: 5px;
+            z-index: 1001;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .tour-content {
+            position: absolute;
+            background-color: var(--tour-background-color); /* Cambia colore dello sfondo */
+            color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1002;
+            text-align: center;
+            width: 300px;
+        }
+
+        .tour-content p {
+            margin-bottom: 20px;
+        }
+
+        .tour-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tour-buttons button {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .tour-buttons button:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        #tour-step {
+            margin: 10px;
+        }
+
+        /* Version Info */
+        .version-info {
+            position: fixed;
+            bottom: 0px;
+            right: 0px;
+            color: var(--secondary-color);
+            padding: 0px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 10px;
+                padding: 100px 10px 10px 10px;
+            }
+
+            .section {
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                height: auto;
+                padding: 10px;
+            }
+
+            .header-buttons {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+        }
+    </style>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/diff@5.0.0/dist/diff.min.js"></script> -->
+    <script>
+        !function(e,n){"object"==typeof exports&&"undefined"!=typeof module?n(exports):"function"==typeof define&&define.amd?define(["exports"],n):n((e=e||self).Diff={})}(this,(function(e){"use strict";function n(){}function t(e,n,t,r,i){for(var o=0,l=n.length,s=0,a=0;o<l;o++){var u=n[o];if(u.removed){if(u.value=e.join(r.slice(a,a+u.count)),a+=u.count,o&&n[o-1].added){var f=n[o-1];n[o-1]=n[o],n[o]=f}}else{if(!u.added&&i){var d=t.slice(s,s+u.count);d=d.map((function(e,n){var t=r[a+n];return t.length>e.length?t:e})),u.value=e.join(d)}else u.value=e.join(t.slice(s,s+u.count));s+=u.count,u.added||(a+=u.count)}}var c=n[l-1];return l>1&&"string"==typeof c.value&&(c.added||c.removed)&&e.equals("",c.value)&&(n[l-2].value+=c.value,n.pop()),n}function r(e){return{newPos:e.newPos,components:e.components.slice(0)}}n.prototype={diff:function(e,n){var i=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},o=i.callback;"function"==typeof i&&(o=i,i={}),this.options=i;var l=this;function s(e){return o?(setTimeout((function(){o(void 0,e)}),0),!0):e}e=this.castInput(e),n=this.castInput(n),e=this.removeEmpty(this.tokenize(e));var a=(n=this.removeEmpty(this.tokenize(n))).length,u=e.length,f=1,d=a+u,c=[{newPos:-1,components:[]}],h=this.extractCommon(c[0],n,e,0);if(c[0].newPos+1>=a&&h+1>=u)return s([{value:this.join(n),count:n.length}]);function p(){for(var i=-1*f;i<=f;i+=2){var o=void 0,d=c[i-1],h=c[i+1],p=(h?h.newPos:0)-i;d&&(c[i-1]=void 0);var v=d&&d.newPos+1<a,g=h&&0<=p&&p<u;if(v||g){if(!v||g&&d.newPos<h.newPos?(o=r(h),l.pushComponent(o.components,void 0,!0)):((o=d).newPos++,l.pushComponent(o.components,!0,void 0)),p=l.extractCommon(o,n,e,i),o.newPos+1>=a&&p+1>=u)return s(t(l,o.components,n,e,l.useLongestToken));c[i]=o}else c[i]=void 0}f++}if(o)!function e(){setTimeout((function(){if(f>d)return o();p()||e()}),0)}();else for(;f<=d;){var v=p();if(v)return v}},pushComponent:function(e,n,t){var r=e[e.length-1];r&&r.added===n&&r.removed===t?e[e.length-1]={count:r.count+1,added:n,removed:t}:e.push({count:1,added:n,removed:t})},extractCommon:function(e,n,t,r){for(var i=n.length,o=t.length,l=e.newPos,s=l-r,a=0;l+1<i&&s+1<o&&this.equals(n[l+1],t[s+1]);)l++,s++,a++;return a&&e.components.push({count:a}),e.newPos=l,s},equals:function(e,n){return this.options.comparator?this.options.comparator(e,n):e===n||this.options.ignoreCase&&e.toLowerCase()===n.toLowerCase()},removeEmpty:function(e){for(var n=[],t=0;t<e.length;t++)e[t]&&n.push(e[t]);return n},castInput:function(e){return e},tokenize:function(e){return e.split("")},join:function(e){return e.join("")}};var i=new n;function o(e,n){if("function"==typeof e)n.callback=e;else if(e)for(var t in e)e.hasOwnProperty(t)&&(n[t]=e[t]);return n}var l=/^[A-Za-z\xC0-\u02C6\u02C8-\u02D7\u02DE-\u02FF\u1E00-\u1EFF]+$/,s=/\S/,a=new n;a.equals=function(e,n){return this.options.ignoreCase&&(e=e.toLowerCase(),n=n.toLowerCase()),e===n||this.options.ignoreWhitespace&&!s.test(e)&&!s.test(n)},a.tokenize=function(e){for(var n=e.split(/([^\S\r\n]+|[()[\]{}'"\r\n]|\b)/),t=0;t<n.length-1;t++)!n[t+1]&&n[t+2]&&l.test(n[t])&&l.test(n[t+2])&&(n[t]+=n[t+2],n.splice(t+1,2),t--);return n};var u=new n;function f(e,n,t){return u.diff(e,n,t)}u.tokenize=function(e){var n=[],t=e.split(/(\n|\r\n)/);t[t.length-1]||t.pop();for(var r=0;r<t.length;r++){var i=t[r];r%2&&!this.options.newlineIsToken?n[n.length-1]+=i:(this.options.ignoreWhitespace&&(i=i.trim()),n.push(i))}return n};var d=new n;d.tokenize=function(e){return e.split(/(\S.+?[.!?])(?=\s+|$)/)};var c=new n;function h(e){return(h="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function p(e){return function(e){if(Array.isArray(e))return v(e)}(e)||function(e){if("undefined"!=typeof Symbol&&Symbol.iterator in Object(e))return Array.from(e)}(e)||function(e,n){if(!e)return;if("string"==typeof e)return v(e,n);var t=Object.prototype.toString.call(e).slice(8,-1);"Object"===t&&e.constructor&&(t=e.constructor.name);if("Map"===t||"Set"===t)return Array.from(e);if("Arguments"===t||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t))return v(e,n)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function v(e,n){(null==n||n>e.length)&&(n=e.length);for(var t=0,r=new Array(n);t<n;t++)r[t]=e[t];return r}c.tokenize=function(e){return e.split(/([{}:;,]|\s+)/)};var g=Object.prototype.toString,m=new n;function w(e,n,t,r,i){var o,l;for(n=n||[],t=t||[],r&&(e=r(i,e)),o=0;o<n.length;o+=1)if(n[o]===e)return t[o];if("[object Array]"===g.call(e)){for(n.push(e),l=new Array(e.length),t.push(l),o=0;o<e.length;o+=1)l[o]=w(e[o],n,t,r,i);return n.pop(),t.pop(),l}if(e&&e.toJSON&&(e=e.toJSON()),"object"===h(e)&&null!==e){n.push(e),l={},t.push(l);var s,a=[];for(s in e)e.hasOwnProperty(s)&&a.push(s);for(a.sort(),o=0;o<a.length;o+=1)l[s=a[o]]=w(e[s],n,t,r,s);n.pop(),t.pop()}else l=e;return l}m.useLongestToken=!0,m.tokenize=u.tokenize,m.castInput=function(e){var n=this.options,t=n.undefinedReplacement,r=n.stringifyReplacer,i=void 0===r?function(e,n){return void 0===n?t:n}:r;return"string"==typeof e?e:JSON.stringify(w(e,null,null,i),i,"  ")},m.equals=function(e,t){return n.prototype.equals.call(m,e.replace(/,([\r\n])/g,"$1"),t.replace(/,([\r\n])/g,"$1"))};var y=new n;function L(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},t=e.split(/\r\n|[\n\v\f\r\x85]/),r=e.match(/\r\n|[\n\v\f\r\x85]/g)||[],i=[],o=0;function l(){var e={};for(i.push(e);o<t.length;){var r=t[o];if(/^(\-\-\-|\+\+\+|@@)\s/.test(r))break;var l=/^(?:Index:|diff(?: -r \w+)+)\s+(.+?)\s*$/.exec(r);l&&(e.index=l[1]),o++}for(s(e),s(e),e.hunks=[];o<t.length;){var u=t[o];if(/^(Index:|diff|\-\-\-|\+\+\+)\s/.test(u))break;if(/^@@/.test(u))e.hunks.push(a());else{if(u&&n.strict)throw new Error("Unknown line "+(o+1)+" "+JSON.stringify(u));o++}}}function s(e){var n=/^(---|\+\+\+)\s+(.*)$/.exec(t[o]);if(n){var r="---"===n[1]?"old":"new",i=n[2].split("\t",2),l=i[0].replace(/\\\\/g,"\\");/^".*"$/.test(l)&&(l=l.substr(1,l.length-2)),e[r+"FileName"]=l,e[r+"Header"]=(i[1]||"").trim(),o++}}function a(){var e=o,i=t[o++].split(/@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/),l={oldStart:+i[1],oldLines:void 0===i[2]?1:+i[2],newStart:+i[3],newLines:void 0===i[4]?1:+i[4],lines:[],linedelimiters:[]};0===l.oldLines&&(l.oldStart+=1),0===l.newLines&&(l.newStart+=1);for(var s=0,a=0;o<t.length&&!(0===t[o].indexOf("--- ")&&o+2<t.length&&0===t[o+1].indexOf("+++ ")&&0===t[o+2].indexOf("@@"));o++){var u=0==t[o].length&&o!=t.length-1?" ":t[o][0];if("+"!==u&&"-"!==u&&" "!==u&&"\\"!==u)break;l.lines.push(t[o]),l.linedelimiters.push(r[o]||"\n"),"+"===u?s++:"-"===u?a++:" "===u&&(s++,a++)}if(s||1!==l.newLines||(l.newLines=0),a||1!==l.oldLines||(l.oldLines=0),n.strict){if(s!==l.newLines)throw new Error("Added line count did not match for hunk at line "+(e+1));if(a!==l.oldLines)throw new Error("Removed line count did not match for hunk at line "+(e+1))}return l}for(;o<t.length;)l();return i}function x(e,n,t){var r=!0,i=!1,o=!1,l=1;return function s(){if(r&&!o){if(i?l++:r=!1,e+l<=t)return l;o=!0}if(!i)return o||(r=!0),n<=e-l?-l++:(i=!0,s())}}function S(e,n){var t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if("string"==typeof n&&(n=L(n)),Array.isArray(n)){if(n.length>1)throw new Error("applyPatch only works with a single input.");n=n[0]}var r,i,o=e.split(/\r\n|[\n\v\f\r\x85]/),l=e.match(/\r\n|[\n\v\f\r\x85]/g)||[],s=n.hunks,a=t.compareLine||function(e,n,t,r){return n===r},u=0,f=t.fuzzFactor||0,d=0,c=0;function h(e,n){for(var t=0;t<e.lines.length;t++){var r=e.lines[t],i=r.length>0?r[0]:" ",l=r.length>0?r.substr(1):r;if(" "===i||"-"===i){if(!a(n+1,o[n],i,l)&&++u>f)return!1;n++}}return!0}for(var p=0;p<s.length;p++){for(var v=s[p],g=o.length-v.oldLines,m=0,w=c+v.oldStart-1,y=x(w,d,g);void 0!==m;m=y())if(h(v,w+m)){v.offset=c+=m;break}if(void 0===m)return!1;d=v.offset+v.oldStart+v.oldLines}for(var S=0,k=0;k<s.length;k++){var b=s[k],F=b.oldStart+b.offset+S-1;S+=b.newLines-b.oldLines;for(var N=0;N<b.lines.length;N++){var H=b.lines[N],P=H.length>0?H[0]:" ",C=H.length>0?H.substr(1):H,j=b.linedelimiters[N];if(" "===P)F++;else if("-"===P)o.splice(F,1),l.splice(F,1);else if("+"===P)o.splice(F,0,C),l.splice(F,0,j),F++;else if("\\"===P){var z=b.lines[N-1]?b.lines[N-1][0]:null;"+"===z?r=!0:"-"===z&&(i=!0)}}}if(r)for(;!o[o.length-1];)o.pop(),l.pop();else i&&(o.push(""),l.push("\n"));for(var A=0;A<o.length-1;A++)o[A]=o[A]+l[A];return o.join("")}function k(e,n,t,r,i,o,l){l||(l={}),void 0===l.context&&(l.context=4);var s=f(t,r,l);function a(e){return e.map((function(e){return" "+e}))}s.push({value:"",lines:[]});for(var u=[],d=0,c=0,h=[],v=1,g=1,m=function(e){var n=s[e],i=n.lines||n.value.replace(/\n$/,"").split("\n");if(n.lines=i,n.added||n.removed){var o;if(!d){var f=s[e-1];d=v,c=g,f&&(h=l.context>0?a(f.lines.slice(-l.context)):[],d-=h.length,c-=h.length)}(o=h).push.apply(o,p(i.map((function(e){return(n.added?"+":"-")+e})))),n.added?g+=i.length:v+=i.length}else{if(d)if(i.length<=2*l.context&&e<s.length-2){var m;(m=h).push.apply(m,p(a(i)))}else{var w,y=Math.min(i.length,l.context);(w=h).push.apply(w,p(a(i.slice(0,y))));var L={oldStart:d,oldLines:v-d+y,newStart:c,newLines:g-c+y,lines:h};if(e>=s.length-2&&i.length<=l.context){var x=/\n$/.test(t),S=/\n$/.test(r),k=0==i.length&&h.length>L.oldLines;!x&&k&&t.length>0&&h.splice(L.oldLines,0,"\\ No newline at end of file"),(x||k)&&S||h.push("\\ No newline at end of file")}u.push(L),d=0,c=0,h=[]}v+=i.length,g+=i.length}},w=0;w<s.length;w++)m(w);return{oldFileName:e,newFileName:n,oldHeader:i,newHeader:o,hunks:u}}function b(e,n,t,r,i,o,l){return function(e){var n=[];e.oldFileName==e.newFileName&&n.push("Index: "+e.oldFileName),n.push("==================================================================="),n.push("--- "+e.oldFileName+(void 0===e.oldHeader?"":"\t"+e.oldHeader)),n.push("+++ "+e.newFileName+(void 0===e.newHeader?"":"\t"+e.newHeader));for(var t=0;t<e.hunks.length;t++){var r=e.hunks[t];0===r.oldLines&&(r.oldStart-=1),0===r.newLines&&(r.newStart-=1),n.push("@@ -"+r.oldStart+","+r.oldLines+" +"+r.newStart+","+r.newLines+" @@"),n.push.apply(n,r.lines)}return n.join("\n")+"\n"}(k(e,n,t,r,i,o,l))}function F(e,n){if(n.length>e.length)return!1;for(var t=0;t<n.length;t++)if(n[t]!==e[t])return!1;return!0}function N(e){var n=D(e.lines),t=n.oldLines,r=n.newLines;void 0!==t?e.oldLines=t:delete e.oldLines,void 0!==r?e.newLines=r:delete e.newLines}function H(e,n){if("string"==typeof e){if(/^@@/m.test(e)||/^Index:/m.test(e))return L(e)[0];if(!n)throw new Error("Must provide a base reference or pass in a patch");return k(void 0,void 0,n,e)}return e}function P(e){return e.newFileName&&e.newFileName!==e.oldFileName}function C(e,n,t){return n===t?n:(e.conflict=!0,{mine:n,theirs:t})}function j(e,n){return e.oldStart<n.oldStart&&e.oldStart+e.oldLines<n.oldStart}function z(e,n){return{oldStart:e.oldStart,oldLines:e.oldLines,newStart:e.newStart+n,newLines:e.newLines,lines:e.lines}}function A(e,n,t,r,i){var o={offset:n,lines:t,index:0},l={offset:r,lines:i,index:0};for($(e,o,l),$(e,l,o);o.index<o.lines.length&&l.index<l.lines.length;){var s=o.lines[o.index],a=l.lines[l.index];if("-"!==s[0]&&"+"!==s[0]||"-"!==a[0]&&"+"!==a[0])if("+"===s[0]&&" "===a[0]){var u;(u=e.lines).push.apply(u,p(M(o)))}else if("+"===a[0]&&" "===s[0]){var f;(f=e.lines).push.apply(f,p(M(l)))}else"-"===s[0]&&" "===a[0]?O(e,o,l):"-"===a[0]&&" "===s[0]?O(e,l,o,!0):s===a?(e.lines.push(s),o.index++,l.index++):I(e,M(o),M(l));else E(e,o,l)}T(e,o),T(e,l),N(e)}function E(e,n,t){var r,i,o=M(n),l=M(t);if(q(o)&&q(l)){var s,a;if(F(o,l)&&W(t,o,o.length-l.length))return void(s=e.lines).push.apply(s,p(o));if(F(l,o)&&W(n,l,l.length-o.length))return void(a=e.lines).push.apply(a,p(l))}else if(i=l,(r=o).length===i.length&&F(r,i)){var u;return void(u=e.lines).push.apply(u,p(o))}I(e,o,l)}function O(e,n,t,r){var i,o=M(n),l=function(e,n){var t=[],r=[],i=0,o=!1,l=!1;for(;i<n.length&&e.index<e.lines.length;){var s=e.lines[e.index],a=n[i];if("+"===a[0])break;if(o=o||" "!==s[0],r.push(a),i++,"+"===s[0])for(l=!0;"+"===s[0];)t.push(s),s=e.lines[++e.index];a.substr(1)===s.substr(1)?(t.push(s),e.index++):l=!0}"+"===(n[i]||"")[0]&&o&&(l=!0);if(l)return t;for(;i<n.length;)r.push(n[i++]);return{merged:r,changes:t}}(t,o);l.merged?(i=e.lines).push.apply(i,p(l.merged)):I(e,r?l:o,r?o:l)}function I(e,n,t){e.conflict=!0,e.lines.push({conflict:!0,mine:n,theirs:t})}function $(e,n,t){for(;n.offset<t.offset&&n.index<n.lines.length;){var r=n.lines[n.index++];e.lines.push(r),n.offset++}}function T(e,n){for(;n.index<n.lines.length;){var t=n.lines[n.index++];e.lines.push(t)}}function M(e){for(var n=[],t=e.lines[e.index][0];e.index<e.lines.length;){var r=e.lines[e.index];if("-"===t&&"+"===r[0]&&(t="+"),t!==r[0])break;n.push(r),e.index++}return n}function q(e){return e.reduce((function(e,n){return e&&"-"===n[0]}),!0)}function W(e,n,t){for(var r=0;r<t;r++){var i=n[n.length-t+r].substr(1);if(e.lines[e.index+r]!==" "+i)return!1}return e.index+=t,!0}function D(e){var n=0,t=0;return e.forEach((function(e){if("string"!=typeof e){var r=D(e.mine),i=D(e.theirs);void 0!==n&&(r.oldLines===i.oldLines?n+=r.oldLines:n=void 0),void 0!==t&&(r.newLines===i.newLines?t+=r.newLines:t=void 0)}else void 0===t||"+"!==e[0]&&" "!==e[0]||t++,void 0===n||"-"!==e[0]&&" "!==e[0]||n++})),{oldLines:n,newLines:t}}function J(e){var n=e;return n=(n=(n=(n=n.replace(/&/g,"&amp;")).replace(/</g,"&lt;")).replace(/>/g,"&gt;")).replace(/"/g,"&quot;")}y.tokenize=function(e){return e.slice()},y.join=y.removeEmpty=function(e){return e},e.Diff=n,e.applyPatch=S,e.applyPatches=function(e,n){"string"==typeof e&&(e=L(e));var t=0;!function r(){var i=e[t++];if(!i)return n.complete();n.loadFile(i,(function(e,t){if(e)return n.complete(e);var o=S(t,i,n);n.patched(i,o,(function(e){if(e)return n.complete(e);r()}))}))}()},e.canonicalize=w,e.convertChangesToDMP=function(e){for(var n,t,r=[],i=0;i<e.length;i++)t=(n=e[i]).added?1:n.removed?-1:0,r.push([t,n.value]);return r},e.convertChangesToXML=function(e){for(var n=[],t=0;t<e.length;t++){var r=e[t];r.added?n.push("<ins>"):r.removed&&n.push("<del>"),n.push(J(r.value)),r.added?n.push("</ins>"):r.removed&&n.push("</del>")}return n.join("")},e.createPatch=function(e,n,t,r,i,o){return b(e,e,n,t,r,i,o)},e.createTwoFilesPatch=b,e.diffArrays=function(e,n,t){return y.diff(e,n,t)},e.diffChars=function(e,n,t){return i.diff(e,n,t)},e.diffCss=function(e,n,t){return c.diff(e,n,t)},e.diffJson=function(e,n,t){return m.diff(e,n,t)},e.diffLines=f,e.diffSentences=function(e,n,t){return d.diff(e,n,t)},e.diffTrimmedLines=function(e,n,t){var r=o(t,{ignoreWhitespace:!0});return u.diff(e,n,r)},e.diffWords=function(e,n,t){return t=o(t,{ignoreWhitespace:!0}),a.diff(e,n,t)},e.diffWordsWithSpace=function(e,n,t){return a.diff(e,n,t)},e.merge=function(e,n,t){e=H(e,t),n=H(n,t);var r={};(e.index||n.index)&&(r.index=e.index||n.index),(e.newFileName||n.newFileName)&&(P(e)?P(n)?(r.oldFileName=C(r,e.oldFileName,n.oldFileName),r.newFileName=C(r,e.newFileName,n.newFileName),r.oldHeader=C(r,e.oldHeader,n.oldHeader),r.newHeader=C(r,e.newHeader,n.newHeader)):(r.oldFileName=e.oldFileName,r.newFileName=e.newFileName,r.oldHeader=e.oldHeader,r.newHeader=e.newHeader):(r.oldFileName=n.oldFileName||e.oldFileName,r.newFileName=n.newFileName||e.newFileName,r.oldHeader=n.oldHeader||e.oldHeader,r.newHeader=n.newHeader||e.newHeader)),r.hunks=[];for(var i=0,o=0,l=0,s=0;i<e.hunks.length||o<n.hunks.length;){var a=e.hunks[i]||{oldStart:1/0},u=n.hunks[o]||{oldStart:1/0};if(j(a,u))r.hunks.push(z(a,l)),i++,s+=a.newLines-a.oldLines;else if(j(u,a))r.hunks.push(z(u,s)),o++,l+=u.newLines-u.oldLines;else{var f={oldStart:Math.min(a.oldStart,u.oldStart),oldLines:0,newStart:Math.min(a.newStart+l,u.oldStart+s),newLines:0,lines:[]};A(f,a.oldStart,a.lines,u.oldStart,u.lines),o++,i++,r.hunks.push(f)}}return r},e.parsePatch=L,e.structuredPatch=k,Object.defineProperty(e,"__esModule",{value:!0})}));
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">
+            FInsert
+            <span class="header-subtitle">by ♦️RP</span>
+        </div>
+        <div class="header-buttons">
+            <button id="button-tour">Tour</button>
+            <button id="button-reset" style="margin-right: 50px;">Reset</button>
+            <button id="button-compare-method" class="hidden">Compara per Parole</button>
+            <button id="button-toggle-b">+</button>
+        </div>
+    </div>
+    <div class="container">
+        <div id="section-a" class="section">
+            <div id="container-input-a">
+                <div id="input-a" class="editable" contenteditable="true" placeholder="INSERT Query..."></div>
+            </div>
+            <div id="container-output-a">
+                <div id="output-a">
+                    <div class="label-table">
+                        <span><strong>TABELLA:</strong> <div id="table-name-a" class="table-name"></div></span>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>COLONNA</th>
+                                <th>VALORE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-a"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="section-b" class="section hidden">
+            <div id="container-input-b">
+                <div id="input-b" class="editable" contenteditable="true" placeholder="INSERT Query..."></div>
+            </div>
+            <div id="container-output-b">
+                <div id="output-b">
+                    <div class="label-table">
+                        <span><strong>TABELLA:</strong> <div id="table-name-b" class="table-name"></div></span>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>COLONNA</th>
+                                <th>VALORE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-b"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="tour-overlay" class="tour-overlay">
+            <div id="tour-highlight" class="tour-highlight"></div>
+            <div id="tour-content" class="tour-content">
+                <p id="tour-text"></p>
+                <div class="tour-buttons">
+                    <button id="tour-skip">Salta il Tour</button>
+                    <span id="tour-step"></span>
+                    <button id="tour-next">Successivo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <span class="version-info">v0.9.0</span>
+
+    <script>
+
+        // ********************************************************************************
+        // Custom Types
+        // ********************************************************************************
+
+        class QueryInsert {
+            constructor(sql) {
+                this.sql = sql;
+                this.tableName = '';
+                this.columnNames = [];
+                this.fieldValues = [];
+                this.isParsed = false;
+                this.parseSql();
+            }
+
+            parseSql() {
+                const sqlRegex = /INSERT INTO\s+([A-Z_.]+)\s*\(([^)]+)\)\s*VALUES\s*\((.+)\)/i;
+                const match = sqlRegex.exec(this.sql);
+
+                if (match) {
+                    this.tableName = match[1].trim();
+                    this.columnNames = this.parseColumnNames(match[2]);
+                    this.fieldValues = this.parseFieldValues(match[3]);
+                    this.isParsed = true;
+                    return;
+                }
+                this.isParsed = false;
+            }
+
+            parseColumnNames(sqlColumnNames) {
+                return sqlColumnNames.split(',').map(col => col.trim());
+            }
+
+            parseFieldValues(sqlFieldValues) {
+                const fieldValues = [];
+                let currentFieldValue = '';
+                let inQuotes = false;
+                let inFunction = 0;
+
+                for (let i = 0; i < sqlFieldValues.length; i++) {
+                    const char = sqlFieldValues[i];
+
+                    if (char === "'" && !inFunction) {
+                        inQuotes = !inQuotes;
+                        currentFieldValue += char;
+                    } else if (char === '(' && !inQuotes) {
+                        inFunction++;
+                        currentFieldValue += char;
+                    } else if (char === ')' && !inQuotes && inFunction > 0) {
+                        inFunction--;
+                        currentFieldValue += char;
+                    } else if (char === ',' && !inQuotes && inFunction === 0) {
+                        fieldValues.push(currentFieldValue.trim());
+                        currentFieldValue = '';
+                    } else {
+                        currentFieldValue += char;
+                    }
+                }
+
+                if (currentFieldValue) {
+                    fieldValues.push(currentFieldValue.trim());
+                }
+
+                return fieldValues;
+            }
+
+            changeFieldValue(columnName, newFieldValue) {
+                const index = this.columnNames.indexOf(columnName);
+                if (index !== -1) {
+                    this.fieldValues[index] = newFieldValue;
+                    this.updateSql();
+                }
+            }
+
+            updateSql() {
+                const columns = this.columnNames.join(', ');
+                const values = this.fieldValues.join(',');
+                this.sql = `INSERT INTO ${this.tableName} (${columns}) VALUES(${values})`;
+                this.parseSql();
+            }
+        }
+
+        const sectionA = 'a';
+        const sectionB = 'b';
+        const compareMethodWords = 'words';
+        const compareMethodChars = 'chars';
+
+        // ********************************************************************************
+        // DOM Objects
+        // ********************************************************************************
+
+        const buttonToggleSectionB = document.getElementById('button-toggle-b');
+        const buttonCompareMethod = document.getElementById('button-compare-method');
+        const buttonReset = document.getElementById('button-reset');
+        const buttonTour = document.getElementById('button-tour');
+        const divTourOverlay = document.getElementById('tour-overlay');
+        const divTourHighlight = document.getElementById('tour-highlight');
+        const divTourContent = document.getElementById('tour-content');
+        const divTourText = document.getElementById('tour-text');
+        const spanTourText = document.getElementById('tour-step');
+        const buttonTourSkip = document.getElementById('tour-skip');
+        const buttonTourNext = document.getElementById('tour-next');
+
+
+        const section = {};
+        section[sectionA] = {
+            query: null,
+            div: document.getElementById('section-a'),
+            editableInput: document.getElementById('input-a'),
+            divOutput: document.getElementById('container-output-a'),
+            divTableName: document.getElementById('table-name-a'),
+            tbody: document.getElementById('tbody-a')
+        };
+        section[sectionB] = {
+            query: null,
+            div: document.getElementById('section-b'),
+            editableInput: document.getElementById('input-b'),
+            divOutput: document.getElementById('container-output-b'),
+            divTableName: document.getElementById('table-name-b'),
+            tbody: document.getElementById('tbody-b')
+        };
+
+
+        // ********************************************************************************
+        // Constants
+        // ********************************************************************************
+
+        const compareMethod = {}
+        compareMethod['words'] = {
+            'display': 'Parole',
+            'function': Diff.diffWords
+        };
+        compareMethod['chars'] = {
+            'display': 'Caratteri',
+            'function': Diff.diffChars
+        };
+
+
+        // ********************************************************************************
+        // Settings
+        // ********************************************************************************
+
+        let compareActive = false;
+        let activeCompareMethod = 'words';
+        let tour = true;
+        let currentTourStep = 0;
+
+        const defaultSettings = {
+            'compareActive': false,
+            'activeCompareMethod': compareMethodWords,
+            'sqlA': '',
+            'sqlB': '',
+            'tour': true
+        };
+
+        function settingsSave() {
+            localStorage.setItem('userSettings', JSON.stringify({
+                'compareActive': compareActive,
+                'activeCompareMethod': activeCompareMethod,
+                'sqlA': section[sectionA].editableInput.innerText,
+                'sqlB': section[sectionB].editableInput.innerText,
+                'tour': tour
+            }));
+        }
+
+        function settingsLoad() {
+            const savedSettings = localStorage.getItem('userSettings');
+            settings = savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+
+            resetAll();
+            activeCompareMethod = settings['activeCompareMethod'];
+            section[sectionA].editableInput.innerText = settings['sqlA'];
+            section[sectionB].editableInput.innerText = settings['sqlB'];
+            Object.entries(section).forEach(([id, section]) => {
+                FInsertUpdate(section);
+            });
+            toggleSectionB(settings['compareActive']);
+            setCompareMethod(settings['activeCompareMethod']);
+            tour = settings['tour'];
+            if (tour) {
+                startTour();
+            }
+            settingsSave();
+        }
+
+
+
+        // ********************************************************************************
+        // FInsert HTML Management
+        // ********************************************************************************
+
+        function FInsertReset(targetSection) {
+            targetSection.divTableName.innerHTML = '';
+            targetSection.tbody.innerHTML = '';
+        }
+
+        function FInsertFill(targetSection) {
+            targetSection.divTableName.innerText = targetSection.query.tableName;
+
+            targetSection.query.columnNames.forEach((columnName, i) => {
+                const tr = document.createElement('tr');
+                const tdCol = document.createElement('td');
+                tdCol.textContent = columnName;
+
+                const tdVal = document.createElement('td');
+                const inputVal = document.createElement('input');
+                inputVal.type = 'text';
+                inputVal.value = targetSection.query.fieldValues[i];
+                inputVal.className = 'input-field';
+
+                inputVal.addEventListener('input', (event) => {
+                    const newValue = event.target.value;
+                    targetSection.query.changeFieldValue(columnName, newValue);
+                    targetSection.editableInput.innerText = targetSection.query.sql;
+                    if (compareActive) {
+                        if (section[sectionA].query && section[sectionB].query &&section[sectionA].query.isParsed && section[sectionB].query.isParsed) {
+                            section[sectionA].query.updateSql();
+                            section[sectionB].query.updateSql();
+                            section[sectionA].editableInput.innerText = section[sectionA].query.sql;
+                            section[sectionB].editableInput.innerText = section[sectionB].query.sql;
+                        }
+                        highlightDifferences();
+                    }
+                    settingsSave();
+                });
+
+                tdVal.appendChild(inputVal);
+                tr.appendChild(tdCol);
+                tr.appendChild(tdVal);
+                targetSection.tbody.appendChild(tr);
+            });
+        }
+
+        function FInsertUpdate(section) {
+            FInsertReset(section);
+            if (section.editableInput.innerText.trim() === '') return;
+            section.query = new QueryInsert(section.editableInput.innerText);
+            if (section.query.isParsed) FInsertFill(section);
+            if (compareActive) highlightDifferences(section);
+        }
+
+        function cursorPositionSave(editableDiv) {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const preSelectionRange = range.cloneRange();
+            preSelectionRange.selectNodeContents(editableDiv);
+            preSelectionRange.setEnd(range.startContainer, range.startOffset);
+            const start = preSelectionRange.toString().length;
+
+            return { start, end: start + range.toString().length };
+        }
+
+        function cursorPositionLoad(editableDiv, savedPosition) {
+            const nodeStack = [editableDiv];
+            let node, charIndex = 0, startFound = false, endFound = false;
+            let range = document.createRange();
+            let selection = window.getSelection();
+
+            while ((node = nodeStack.pop()) && !endFound) {
+                if (node.nodeType === 3) {
+                    const nextCharIndex = charIndex + node.length;
+                    if (!startFound && savedPosition.start >= charIndex && savedPosition.start <= nextCharIndex) {
+                        range.setStart(node, savedPosition.start - charIndex);
+                        startFound = true;
+                    }
+                    if (startFound && savedPosition.end >= charIndex && savedPosition.end <= nextCharIndex) {
+                        range.setEnd(node, savedPosition.end - charIndex);
+                        endFound = true;
+                    }
+                    charIndex = nextCharIndex;
+                } else {
+                    let i = node.childNodes.length;
+                    while (i--) {
+                        nodeStack.push(node.childNodes[i]);
+                    }
+                }
+            }
+
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        function highlightDifferences(callerSection) {
+
+            const rowsA = Array.from(section[sectionA].tbody.rows);
+            const rowsB = Array.from(section[sectionB].tbody.rows);
+
+            rowsA.forEach((rowA, index) => {
+                const rowB = rowsB[index];
+                if (!rowB) return;
+
+                const cellsA = Array.from(rowA.cells);
+                const cellsB = Array.from(rowB.cells);
+
+
+                cellsA.forEach((cellA, cellIndex) => {
+                    const cellB = cellsB[cellIndex];
+                    if (!cellB) return;
+
+                    let valueA = cellA.textContent;
+                    let valueB = cellB.textContent;
+
+                    const inputA = cellA.querySelector('input');
+                    const inputB = cellB.querySelector('input');
+
+                    if (inputA) valueA = inputA.value;
+                    if (inputB) valueB = inputB.value;
+
+                    if (valueA !== valueB && compareActive) {
+                        cellA.style.backgroundColor = 'lightcoral';
+                        cellB.style.backgroundColor = 'lightgreen';
+                    } else {
+                        cellA.style.backgroundColor = '';
+                        cellB.style.backgroundColor = '';
+                    }
+                });
+            });
+
+
+            if (!compareActive) return;
+
+
+            const divTableNameA = section[sectionA].divTableName;
+            const divTableNameB = section[sectionB].divTableName;
+
+            let tableNameHtmlA = '';
+            let tableNameHtmlB = '';
+
+            compareMethod[activeCompareMethod]['function'](divTableNameA.innerText, divTableNameB.innerText).forEach(part => {
+                const style = part.added ? 'background-color:lightgreen' :
+                            part.removed ? 'background-color:lightcoral' : 'background-color:none';
+                const span = `<span style="${style}">${part.value}</span>`;
+                if (part.removed) {
+                    tableNameHtmlA += span;
+                } else if (part.added) {
+                    tableNameHtmlB += span;
+                } else {
+                    tableNameHtmlA += span;
+                    tableNameHtmlB += span;
+                }
+            });
+
+            divTableNameA.innerHTML = tableNameHtmlA;
+            divTableNameB.innerHTML = tableNameHtmlB;
+
+
+
+
+
+
+            let aHtml = '';
+            let bHtml = '';
+
+            compareMethod[activeCompareMethod]['function'](section[sectionA].editableInput.innerText, section[sectionB].editableInput.innerText).forEach(part => {
+                const style = part.added ? 'background-color:lightgreen' :
+                              part.removed ? 'background-color:lightcoral' : 'background-color:none';
+                const span = `<span style="${style}">${part.value}</span>`;
+                if (part.removed) {
+                    aHtml += span;
+                } else if (part.added) {
+                    bHtml += span;
+                } else {
+                    aHtml += span;
+                    bHtml += span;
+                }
+            });
+
+            let cursorPos;
+            if (callerSection && !tour) {
+                cursorPos = cursorPositionSave(callerSection.editableInput);
+            }
+
+            section[sectionA].editableInput.innerHTML = aHtml;
+            section[sectionB].editableInput.innerHTML = bHtml;
+
+            if (callerSection && !tour) {
+                cursorPositionLoad(callerSection.editableInput, cursorPos);
+            }
+
+        }
+
+        function resetAll() {
+            section[sectionA].editableInput.innerHTML = '';
+            section[sectionB].editableInput.innerHTML = '';
+            section[sectionA].query = null;
+            section[sectionB].query = null;
+            Object.entries(section).forEach(([id, section]) => {
+                FInsertReset(section);
+            });
+            setCompareMethod(compareMethodWords);
+            toggleSectionB(false);
+            settingsSave();
+        }
+
+        // ********************************************************************************
+        // Settings Changes
+        // ********************************************************************************
+
+        function toggleSectionB(forceTo) {
+            if (forceTo !== undefined) compareActive = !forceTo;
+            if (compareActive) {
+                section[sectionB].div.classList.add('hidden');
+                section[sectionA].div.style.flex = '1';
+                buttonToggleSectionB.textContent = '+';
+                buttonCompareMethod.classList.add('hidden');
+                section[sectionA].editableInput.innerHTML = section[sectionA].editableInput.innerText;
+                section[sectionB].editableInput.innerHTML = section[sectionB].editableInput.innerText;
+                section[sectionA].divTableName.innerHTML = section[sectionA].divTableName.innerText;
+                section[sectionB].divTableName.innerHTML = section[sectionB].divTableName.innerText;
+            } else {
+                section[sectionB].div.classList.remove('hidden');
+                buttonCompareMethod.classList.remove('hidden');
+                section[sectionA].div.style.flex = '0.5';
+                section[sectionB].div.style.flex = '0.5';
+                buttonToggleSectionB.textContent = '-';
+            }
+            compareActive = !compareActive;
+            highlightDifferences();
+            settingsSave();
+        }
+
+
+        function setCompareMethod(method) {
+            activeCompareMethod = method;
+            buttonCompareMethod.textContent = `Compara per ${compareMethod[activeCompareMethod]['display']}`;
+            highlightDifferences();
+            settingsSave();
+        }
+
+
+        // ********************************************************************************
+        // Tour
+        // ********************************************************************************
+
+        const tourSteps = [
+            {
+                focusOn: '.header-title',
+                text: 'Benvenutə in FInsert! Di seguito una breve panoramica delle funzionalità. Premi il pulsante "Successivo" per continuare...',
+                step: 1
+            },
+            {
+                focusOn: '#input-a',
+                text: 'In questa sezione puoi incollare o scrivere la tua query INSERT per formattare campi e valori.',
+                step: 2
+            },
+            {
+                focusOn: '#input-a',
+                text: 'Proviamo, ad esempio, con questa semplice Query...',
+                step: 3,
+                stepIn: function() {
+                    section[sectionA].editableInput.innerText = 'INSERT INTO table_name (column1, column2, column3) VALUES (value1, \'value2\', to_date(\'2024-06-17\', \'YYYY-MM-DD\'))';
+                    FInsertUpdate(section[sectionA]);
+                }
+            },
+            {
+                focusOn: '#container-output-a',
+                text: 'Nel momento in cui la query INSERT risulta valida, in questa sezione verranno visualizzate le informazioni formattate.',
+                step: 4
+            },
+            {
+                focusOn: '#output-a table thead th:nth-child(2)',
+                text: 'Nella tabella risultante, è possibile modificare il valore di un campo sotto la colonna "VALORE" e la modifica si rifletterà immediatamente nell\'area di testo superiore.',
+                step: 5,
+            },
+            {
+                focusOn: '#output-a table tbody tr:nth-child(2) td:nth-child(2)',
+                text: 'Proviamo ad esempio a variare "value2" in "value3"...',
+                step: 6
+            },
+            {
+                focusOn: '#output-a table tbody tr:nth-child(2) td:nth-child(2)',
+                text: '... ecco fatto!',
+                step: 7,
+                stepIn: function() {
+                    section[sectionA].editableInput.innerText = 'INSERT INTO table_name (column1, column2, column3) VALUES (value1, \'value3\', to_date(\'2024-06-17\', \'YYYY-MM-DD\'))';
+                    FInsertUpdate(section[sectionA]);
+                }
+            },
+            {
+                focusOn: '#input-a',
+                text: 'Come vedi, la modifica si è riflettuta nell\'area di testo superiore. Dunque, tutte le modifiche risultano essere bilaterali tra area di testo e tabella.',
+                step: 8
+            },
+            {
+                focusOn: '#button-toggle-b',
+                text: 'Questo pulsante consente di attivare o disattivare la modalità di confronto tra due query INSERT. Utile per l\'analisi di differenze tra i vari audit trail.',
+                step: 9
+            },
+            {
+                focusOn: '#button-toggle-b',
+                text: 'Premendolo, apparirà una seconda sezione, il cui funzionamento è identico alla prima, ma verranno evidenziate le differenze tra le due query.',
+                step: 10,
+                stepIn: function() {
+                    toggleSectionB(true);
+                }
+            },
+            {
+                focusOn: '#input-b',
+                text: 'Inseriamo la query originale nella seconda sezione...',
+                step: 11
+            },
+            {
+                focusOn: '#section-b',
+                text: '... la sezione si popola con le informazioni formattate ed in verde saranno visibili le parole aggiunte rispetto alla prima sezione...',
+                step: 12,
+                stepIn: function() {
+                    section[sectionB].editableInput.innerText = 'INSERT INTO table_name (column1, column2, column3) VALUES (value1, \'value2\', to_date(\'2024-06-17\', \'YYYY-MM-DD\'))';
+                    FInsertUpdate(section[sectionB]);
+                    highlightDifferences();
+                }
+            },
+            {
+                focusOn: '#section-a',
+                text: '... mentre nella prima sezione, in rosso saranno visibili le parole rimosse rispetto alla seconda sezione.',
+                step: 13
+            },
+            {
+                focusOn: '#button-compare-method',
+                text: 'È possibile inoltre confrontare le due query per caratteri, piuttosto che per parole. Questo pulsante consente di cambiare il metodo di confronto e mostrerà quello attualmente in uso.',
+                step: 14
+            },
+            {
+                focusOn: '.container',
+                text: 'Attivando il metodo di confronto per caratteri, infatti, verranno evidenziati soltanto i caratteri diversi tra le due query.',
+                step: 15,
+                stepIn: function() {
+                    setCompareMethod(compareMethodChars);
+                }
+            },
+            {
+                focusOn: '#button-reset',
+                text: 'Adesso diamo una bella pulita al tutto! Questo pulsante consente di resettare tutte le impostazioni che si preservano nella sessione e svuotare tutti i campi.',
+                step: 16
+            },
+            {
+                focusOn: '#button-tour',
+                text: 'Se desideri ripercorrere questo tour puoi premere in ogni momento questo pulsante. Buon lavoro!',
+                step: 17,
+                stepIn: function() {
+                    resetAll();
+                }
+            }
+        ];
+
+
+        function startTour() {
+            tour = true;
+            resetAll();
+            divTourOverlay.classList.add('active');
+            showTourStep(0);
+        }
+
+        function showTourStep(stepIndex) {
+            const step = tourSteps[stepIndex];
+            if (stepIndex > 0) {
+                const previousStep = tourSteps[stepIndex - 1];
+                if (previousStep.stepOut) {
+                    previousStep.stepOut();
+                }
+            }
+            if (step.stepIn) {
+                step.stepIn();
+            }
+            const focusOn = document.querySelector(step.focusOn);
+
+            if (!focusOn) {
+                console.error('Elemento non trovato per il tour step:', step);
+                return;
+            }
+
+            const rect = focusOn.getBoundingClientRect();
+            divTourHighlight.style.width = `${rect.width}px`;
+            divTourHighlight.style.height = `${rect.height}px`;
+            divTourHighlight.style.top = `${rect.top}px`;
+            divTourHighlight.style.left = `${rect.left}px`;
+
+            divTourText.textContent = step.text;
+            spanTourText.textContent = `${step.step}/${tourSteps.length}`;
+
+            const contentRect = divTourContent.getBoundingClientRect();
+            const offsetX = step.offsetX !== undefined ? step.offsetX : 0;
+            const offsetY = step.offsetY !== undefined ? step.offsetY : 20;
+            const top = rect.top + rect.height + offsetY;
+            const left = rect.left + (rect.width / 2) - (contentRect.width / 2) + offsetX;
+
+            divTourContent.style.top = `${Math.min(top, window.innerHeight - contentRect.height - 20)}px`;
+            divTourContent.style.left = `${Math.min(Math.max(left, 20), window.innerWidth - contentRect.width - 20)}px`;
+        }
+
+
+        // ********************************************************************************
+        // Listeners
+        // ********************************************************************************
+
+        buttonToggleSectionB.addEventListener('click', function() {
+            toggleSectionB();
+        });
+
+        buttonCompareMethod.addEventListener('click', function() {
+            setCompareMethod(activeCompareMethod === compareMethodWords ? compareMethodChars : compareMethodWords);
+        });
+
+        buttonReset.addEventListener('click', function() {
+            resetAll();
+        });
+
+        buttonTour.addEventListener('click', function() {
+            startTour();
+        });
+
+        Object.entries(section).forEach(([id, section]) => {
+            section.editableInput.addEventListener('input', () => {
+                FInsertUpdate(section);
+                settingsSave();
+            });
+        });
+
+        buttonTourSkip.addEventListener('click', () => {
+            divTourOverlay.classList.remove('active');
+            resetAll();
+            tour = false;
+            settingsSave();
+        });
+
+        buttonTourNext.addEventListener('click', () => {
+            currentTourStep++;
+            if (currentTourStep >= tourSteps.length) {
+                divTourOverlay.classList.remove('active');
+                tour = false;
+                settingsSave();
+            } else {
+                showTourStep(currentTourStep);
+            }
+        });
+
+
+        // ********************************************************************************
+        // Initialization
+        // ********************************************************************************
+
+        settingsLoad();
+
+
+    </script>
+</body>
+</html>
