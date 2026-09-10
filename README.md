@@ -4,6 +4,8 @@
 [![Single file](https://img.shields.io/badge/build-single%20file-blue)]()
 [![Made with vanilla JS](https://img.shields.io/badge/JS-vanilla-yellow)]()
 
+🚀 **[Try FInsert live](https://rihak.github.io/finsert/)** — no install needed, just open the link.
+
 **Finsert** is a zero-dependency, single-file browser tool that turns a raw SQL `INSERT INTO` statement into a clear, editable column ↔ value table — so you can immediately see which value belongs to which field, without counting commas by hand.
 
 It also supports a **side-by-side compare mode**, useful for spotting differences between two INSERT statements (for example, two rows from an audit trail).
@@ -20,7 +22,7 @@ It also supports a **side-by-side compare mode**, useful for spotting difference
 
 ## Usage
 
-Just open [`index.html`](index.html) in any modern browser — no build tools, package manager, or server required.
+Try it instantly at **[https://rihak.github.io/finsert/](https://rihak.github.io/finsert/)**, or open [`index.html`](index.html) locally in any modern browser — no build tools, package manager, or server required.
 
 On first load, the guided tour walks you through the main features; you can restart it anytime from the **Tour** button.
 
